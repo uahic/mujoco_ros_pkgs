@@ -87,6 +87,7 @@ configure_project_option(
 
 # Find MuJoCo
 find_package(mujoco 3.2.0 REQUIRED)
+# find_package(mujoco 3.2.0 REQUIRED PATHS $ENV{MUJOCO_DIR} NO_DEFAULT_PATH)
 
 # ###############################################
 # # Declare ROS dynamic reconfigure parameters ##
@@ -242,26 +243,26 @@ else()
     ARCHIVE DESTINATION lib/${PROJECT_NAME}
   )
   
-  ament_export_include_directories(
-    include
-    ${mujoco_INCLUDE_DIRS}
-  )
-  ament_export_dependencies(
-    ament_cmake
-    rclcpp
-    pluginlib
-    tf2
-    tf2_ros
-    image_transport
-    camera_info_manager
-    geometry_msgs
-    tf2_geometry_msgs
-    mujoco_ros_msgs
-    rosgraph_msgs
-    sensor_msgs
-    std_srvs
-    mujoco
-  )
+  # ament_export_include_directories(
+  #   include
+  #   ${mujoco_INCLUDE_DIRS}
+  # )
+  # ament_export_dependencies(
+  #   ament_cmake
+  #   rclcpp
+  #   pluginlib
+  #   tf2
+  #   tf2_ros
+  #   image_transport
+  #   camera_info_manager
+  #   geometry_msgs
+  #   tf2_geometry_msgs
+  #   mujoco_ros_msgs
+  #   rosgraph_msgs
+  #   sensor_msgs
+  #   std_srvs
+  #   mujoco
+  # )
 
 
   ament_export_include_directories(
@@ -269,8 +270,11 @@ else()
     ${GENERATED_HEADERS_DIR}
     ${mujoco_INCLUDE_DIRS}
   )
+  ament_export_libraries(mujoco)
   ament_export_dependencies(
     ament_cmake
+    ament_cmake_ros
+    # mujoco
     rclcpp
     rclcpp_lifecycle
     pluginlib
