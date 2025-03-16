@@ -9,6 +9,7 @@
 #include <mujoco_ros/array_safety.h>
 
 #include <rosgraph_msgs/msg/clock.hpp>
+#include <map>
 
 namespace mju = ::mujoco::sample_util;
 
@@ -116,19 +117,24 @@ void MujocoEnv::GetCameraConfiguration(const std::string &cam_name, rendering::S
 	    get_maybe_undeclared_param(this, cam_name + ".name_segment", std::string(rendering::kDEFAULT_CAM_SEGMENT_TOPIC));
 }
 
-void MujocoEnv::GetInitialJointPositions(std::map<std::string, std::vector<double>> & /*joint_pos_map*/)
+void MujocoEnv::GetInitialJointPositions(std::map<std::string, std::vector<double>> & joint_pos_map)
 {
-	MJR_WARN("Initial joint positions NYI in ROS 2");
-	// std::map<std::string, std::string> joint_map;
-	// nh_->getParam("initial_joint_positions/joint_map", joint_map);
+	std::map<std::string, double> joint_map;
 
-	// // This check only assures that there aren't single axis joint values that are non-strings.
-	// // One ill-defined value among correct parameters can't be detected.
-	// if (nh_->hasParam("initial_joint_positions/joint_map") && joint_map.empty()) {
-	// 	MJR_WARN("Initial joint positions not recognized by rosparam server. Check your config, "
-	// 	         "especially values for single axis joints should explicitly provided as string!");
-	// 	return;
-	// }
+	if (this->get_parameters("initial_joint_states", joint_map)) {
+		for (const auto & joint_entry: joint_map) {
+			const std::string &joint_name = joint_entry.first;
+			double position = joint_entry.second;
+			std::vector<double> axis_vals;
+			axis_vals.push_back(position);
+			joint_pos_map[joint_name] = axis_vals;
+			RCLCPP_INFO(this->get_logger(), "Initial joint: %s set to position: %f", joint_name.c_str(), position);
+		}
+	} else {
+		RCLCPP_WARN(this->get_logger(), "Failed to get 'initial_joint_states' parameter");
+	}
+
+	
 
 	// for (auto const &[name, str_values] : joint_map) {
 	// 	MJR_DEBUG_STREAM("fetched jointpos values of joint " << name << ": " << str_values);
